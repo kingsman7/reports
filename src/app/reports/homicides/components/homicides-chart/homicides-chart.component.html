@@ -1,4 +1,11 @@
 <div class="chart-title">
   <h2>Grafico</h2>
+  <mat-slide-toggle
+    labelPosition="before"
+    [(ngModel)]="checked"
+    (ngModelChange)="onToggle($event)"
+  >
+    Mostrar {{ checked ? 'Barra' : 'Mapa' }}
+  </mat-slide-toggle>
 </div>
-<div style="background: #475e90;" #chartContainer class="chart-container"></div>
+<div style="background: #475e90" #chartContainer class="chart-container"></div>

@@ -6,10 +6,10 @@
 .chart-title{
   display: flex;
   align-items: center;
+  justify-content: space-between;
   background: #879fd4;
-  padding: 10px 0px;
+  padding: 10px 20px;
   h2{
-    padding-left: 20px;
     margin: 0px;
     color: rgb(255, 255, 255);
   }

@@ -7,6 +7,8 @@ import { GeoComponent, GridComponent, TitleComponent, VisualMapComponent } from 
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption } from 'echarts/types/dist/shared';
 import { HttpClient } from '@angular/common/http';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import { FormsModule } from '@angular/forms';
 echarts.use([
   BarChart,
   GridComponent,
@@ -20,7 +22,7 @@ echarts.use([
 
 @Component({
   selector: 'app-homicides-chart',
-  imports: [],
+  imports: [MatSlideToggleModule, FormsModule],
   standalone: true,
   templateUrl: './homicides-chart.component.html',
   styleUrl: './homicides-chart.component.scss',
@@ -29,26 +31,7 @@ echarts.use([
   ]
 })
 export class HomicidesChartComponent implements OnInit, AfterViewInit {
-  ngOnInit(): void {
-    this.dataSort();
-  }
-  @ViewChild('chartContainer') chartContainer!: ElementRef;
-  chart!: echarts.ECharts;
-  isLoad: boolean = false;
-  private http = inject(HttpClient);
-
-  ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.chart = echarts.init(this.chartContainer.nativeElement);
-      this.initChart();
-      this.resizeChart();
-    }, 2000)
-  }
-  resizeChart() {
-    if(this.chart) {
-      this.chart.resize();
-    }
-  }
+  currentOption: any;
   data = [
     { name: 'Amazonas', value: Math.round(Math.random() * 5) },
     { name: 'Anzoátegui', value: Math.round(Math.random() * 5) },
@@ -75,6 +58,124 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
     { name: 'Distrito Capital', value: Math.round(Math.random() * 5) },
     { name: 'Dependencias Federales', value: Math.round(Math.random() * 5) },
   ];
+  mapOption: EChartsOption = {
+    title: {
+      text: 'Homicidios por Estados',
+      top: 20,
+      left: 20,
+      textStyle: {
+        color: '#fff'
+      },
+    },
+    visualMap: {
+      left: 'right',
+      min: 0,
+      max: 5,
+      inRange: {
+        color: [
+          '#313695',
+          '#4575b4',
+          '#74add1',
+          '#abd9e9',
+          '#e0f3f8',
+          '#ffffbf',
+          '#fee090',
+          '#fdae61',
+          '#f46d43',
+          '#d73027',
+          '#a50026'
+        ],
+      },
+      text: ['Mayor', 'Menor'],
+      textStyle: {
+        color: '#fff'
+      },
+      calculable: true
+    },
+    series: [
+      {
+        id: 'population',
+        type: 'map',
+        roam: true,
+        map: 'Venezuela',
+        animationDurationUpdate: 1000,
+        universalTransition: true,
+        data: this.data
+      }
+    ]
+  };
+  optionsBar: EChartsOption = {
+    grid: {
+      top: 20,    // Espacio superior
+      left: 140,   // Espacio izquierdo
+    },
+    xAxis: {
+      type: 'value',
+      axisTick: {
+        lineStyle: {
+          color: '#000',
+          width: 1
+        }
+      }
+    },
+    yAxis: {
+      type: 'category',
+      axisLabel: {
+        rotate: 30
+      },
+      data: this.data.map(function (item) {
+        return item.name;
+      }),
+      axisTick: {
+        lineStyle: {
+          color: '#000',
+          width: 1
+        }
+      }
+    },
+    textStyle:{
+      color: '#fff',
+      fontFamily: 'Arial, sans-serif',
+      fontSize: 5,
+    },
+    animationDurationUpdate: 1000,
+    series: {
+      type: 'bar',
+      id: 'population',
+      data: this.data.map(function (item) {
+        return {
+          value: item.value,
+          itemStyle: {
+            color: '#e6dac7'
+          }
+        };
+      }),
+      universalTransition: true
+    }
+  };
+
+  ngOnInit(): void {
+    this.dataSort();
+  }
+  @ViewChild('chartContainer') chartContainer!: ElementRef;
+  chart!: echarts.ECharts;
+  isLoad: boolean = false;
+  checked = true;
+  private http = inject(HttpClient);
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.chart = echarts.init(this.chartContainer.nativeElement);
+      this.initChart();
+      this.resizeChart();
+    }, 2000)
+  }
+  resizeChart() {
+    if(this.chart) {
+      this.chart.resize();
+    }
+  }
+  
 
   dataSort() {
     this.data.sort((a, b) => {
@@ -85,110 +186,8 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
   initChart(): void {
     this.http.get('assets/geoVenezuela.json').subscribe((vzlaJson: any) => {
       echarts.registerMap('Venezuela', vzlaJson);
-      const mapOption: EChartsOption = {
-        title: {
-          text: 'Homicidios por Estados',
-          top: 20,
-          left: 20,
-          textStyle: {
-            color: '#fff'
-          },
-        },
-        visualMap: {
-          left: 'right',
-          min: 0,
-          max: 5,
-          inRange: {
-            color: [
-              '#313695',
-              '#4575b4',
-              '#74add1',
-              '#abd9e9',
-              '#e0f3f8',
-              '#ffffbf',
-              '#fee090',
-              '#fdae61',
-              '#f46d43',
-              '#d73027',
-              '#a50026'
-            ],
-          },
-          text: ['Mayor', 'Menor'],
-          textStyle: {
-            color: '#fff'
-          },
-          calculable: true
-        },
-        series: [
-          {
-            id: 'population',
-            type: 'map',
-            roam: true,
-            map: 'Venezuela',
-            animationDurationUpdate: 1000,
-            universalTransition: true,
-            data: this.data
-          }
-        ]
-      };
-
-      const optionsBar: EChartsOption = {
-        grid: {
-          top: 20,    // Espacio superior
-          left: 140,   // Espacio izquierdo
-        },
-        xAxis: {
-          type: 'value',
-          axisTick: {
-            lineStyle: {
-              color: '#000',
-              width: 1
-            }
-          }
-        },
-        yAxis: {
-          type: 'category',
-          axisLabel: {
-            rotate: 30
-          },
-          data: this.data.map(function (item) {
-            return item.name;
-          }),
-          axisTick: {
-            lineStyle: {
-              color: '#000',
-              width: 1
-            }
-          }
-        },
-        textStyle:{
-          color: '#fff',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: 5,
-        },
-        animationDurationUpdate: 1000,
-        series: {
-          type: 'bar',
-          id: 'population',
-          data: this.data.map(function (item) {
-            return {
-              value: item.value,
-              itemStyle: {
-                color: '#e6dac7'
-              }
-            };
-          }),
-          universalTransition: true
-        }
-      };
-
-      let currentOption = mapOption;
-      this.chart.setOption(mapOption);
-      setInterval( () => {
-        currentOption = currentOption == mapOption ? optionsBar :mapOption;
-        this.chart.setOption(currentOption, true);
-      }, 5000);
-
+      this.currentOption = this.mapOption;
+      this.chart.setOption(this.mapOption);
     })
   }
   initMap() {
@@ -196,5 +195,8 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
       echarts.registerMap('USA', usaJson);
     })
   }
-
+  onToggle($event: any) {
+    this.currentOption = this.currentOption == this.mapOption ? this.optionsBar :this.mapOption;
+    this.chart.setOption(this.currentOption, true);
+  }
 }
