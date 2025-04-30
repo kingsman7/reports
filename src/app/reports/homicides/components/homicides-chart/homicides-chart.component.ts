@@ -83,13 +83,21 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
   }
 
   initChart(): void {
-    this.http.get('assets/geoVenezuela.geojson').subscribe((vzlaJson: any) => {
+    this.http.get('assets/geoVenezuela.json').subscribe((vzlaJson: any) => {
       echarts.registerMap('Venezuela', vzlaJson);
       const mapOption: EChartsOption = {
+        title: {
+          text: 'Homicidios por Estados',
+          top: 20,
+          left: 20,
+          textStyle: {
+            color: '#fff'
+          },
+        },
         visualMap: {
           left: 'right',
-          min: 1,
-          max: 30,
+          min: 0,
+          max: 5,
           inRange: {
             color: [
               '#313695',
@@ -103,8 +111,13 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
               '#f46d43',
               '#d73027',
               '#a50026'
-            ]
-          }
+            ],
+          },
+          text: ['Mayor', 'Menor'],
+          textStyle: {
+            color: '#fff'
+          },
+          calculable: true
         },
         series: [
           {
@@ -120,9 +133,9 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
       };
 
       const optionsBar: EChartsOption = {
-        title: {
-          text: 'Waterfall Chart',
-          subtext: 'Living Expenses in Shenzhen'
+        grid: {
+          top: 20,    // Espacio superior
+          left: 140,   // Espacio izquierdo
         },
         xAxis: {
           type: 'value',
@@ -149,7 +162,9 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
           }
         },
         textStyle:{
-          color: '#fff'
+          color: '#fff',
+          fontFamily: 'Arial, sans-serif',
+          fontSize: 5,
         },
         animationDurationUpdate: 1000,
         series: {
@@ -162,20 +177,17 @@ export class HomicidesChartComponent implements OnInit, AfterViewInit {
                 color: '#e6dac7'
               }
             };
-
           }),
           universalTransition: true
         }
       };
 
       let currentOption = mapOption;
-
       this.chart.setOption(mapOption);
-
-     /*  setInterval( () => {
-        currentOption = currentOption !== mapOption ? mapOption : optionsBar;
+      setInterval( () => {
+        currentOption = currentOption == mapOption ? optionsBar :mapOption;
         this.chart.setOption(currentOption, true);
-      }, 2000); */
+      }, 5000);
 
     })
   }
